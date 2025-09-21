@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>もっと学習コンテンツ</title>
+
+  <!-- External CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="src/styles/main.css">
+
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body class="app-body">
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-spinner">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">読み込み中...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header id="header" class="app-header">
+    <div class="header-content">
+      <h1 id="logo" class="logo">
+        <a href="index.html" class="logo-link">
+          <img src="images/logo.png" alt="もっと学習コンテンツ" class="logo-image">
+        </a>
+      </h1>
+
+      <aside id="mainimg" class="hero-images">
+        <img src="images/1.jpg" alt="学習イメージ1" class="slide slide1">
+        <img src="images/2.jpg" alt="学習イメージ2" class="slide slide2">
+        <img src="images/3.jpg" alt="学習イメージ3" class="slide slide3">
+        <img src="images/kazari1.png" alt="装飾1" class="decoration kazari1">
+        <img src="images/kazari2.png" alt="装飾2" class="decoration kazari2">
+      </aside>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main" role="main">
+    <div class="container-fluid">
+      <h2 id="title" class="module-title"></h2>
+      <div id="content" class="module-content">
+        <!-- Module content will be dynamically loaded here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Navigation Menu -->
+  <nav id="menubar" class="main-menu">
+    <div class="menu-container">
+      <div class="container d-flex justify-content-center">
+
+        <!-- Language & Basic Skills Column -->
+        <div class="menu-column">
+          <h3 class="menu-column-title">言語・基礎</h3>
+          <ul class="menu-list">
+            <li><button id="cren" class="menu-item" data-category="language">Classroom English</button></li>
+            <li><button id="enwo" class="menu-item" data-category="language">English words</button></li>
+            <li><button id="kata" class="menu-item" data-category="language">カタカナのれんしゅう</button></li>
+            <li><button id="roma" class="menu-item" data-category="language">ローマ字のれんしゅう</button></li>
+          </ul>
+        </div>
+
+        <!-- Math Column -->
+        <div class="menu-column">
+          <h3 class="menu-column-title">算数・数学</h3>
+          <ul class="menu-list">
+            <li><button id="subl" class="menu-item" data-category="math">すうずぶろっく</button></li>
+            <li><button id="kbou" class="menu-item" data-category="math">かぞえぼう</button></li>
+            <li><button id="toke" class="menu-item" data-category="math">とけい</button></li>
+            <li><button id="kuku" class="menu-item" data-category="math">九九のれんしゅう</button></li>
+            <li><button id="hyou" class="menu-item" data-category="math">九九のひょう</button></li>
+            <li><button id="tahi" class="menu-item" data-category="math">たし算のひっ算</button></li>
+            <li><button id="hihi" class="menu-item" data-category="math">ひき算のひっ算</button></li>
+            <li><button id="kah1" class="menu-item" data-category="math">かけ算の筆算１</button></li>
+            <li><button id="kah2" class="menu-item" data-category="math">かけ算の筆算２</button></li>
+            <li><button id="aray" class="menu-item" data-category="math">かけ算アレイ図</button></li>
+            <li><button id="kane" class="menu-item" data-category="math">おかね</button></li>
+          </ul>
+        </div>
+
+        <!-- Music Column -->
+        <div class="menu-column">
+          <h3 class="menu-column-title">音楽</h3>
+          <ul class="menu-list">
+            <li><button id="ham2" class="menu-item" data-category="music">けんばんハーモニカ かんたん</button></li>
+            <li><button id="kenb" class="menu-item" data-category="music">けんばんハーモニカ2</button></li>
+            <li><button id="reco" class="menu-item" data-category="music">リコーダー</button></li>
+            <li><button id="rec2" class="menu-item" data-category="music">リコーダー2</button></li>
+            <li><button id="mokn" class="menu-item" data-category="music">もっきん</button></li>
+            <li><button id="tekn" class="menu-item" data-category="music">てっきん</button></li>
+            <li><button id="fusi" class="menu-item" data-category="music">ふしづくり4年</button></li>
+            <li><button id="gktn" class="menu-item" data-category="music">音楽記号を覚えよう</button></li>
+            <li><button id="otoo" class="menu-item" data-category="music">音を出そう</button></li>
+            <li><button id="waon" class="menu-item" data-category="music">和音を出そう</button></li>
+            <li><button id="metr" class="menu-item" data-category="music">メトロノーム</button></li>
+          </ul>
+        </div>
+
+        <!-- Other Subjects Column -->
+        <div class="menu-column">
+          <h3 class="menu-column-title">その他</h3>
+          <ul class="menu-list">
+            <li><button id="kyot" class="menu-item" data-category="geography">京都市の１１区</button></li>
+            <li><button id="todo" class="menu-item" data-category="geography">都道府県をおぼえよう</button></li>
+            <li><button id="masu" class="menu-item" data-category="art">せんやマスのいろぬり</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- External Links Section -->
+      <section class="external-links">
+        <h3>もっと がくしゅう コンテンツ　+α</h3>
+        <div class="external-links-grid">
+          <a href="https://jimitas.com/kake-hissan/index.html" class="external-link">
+            かけ算の筆算３（小数対応）
+          </a>
+          <a href="https://jimitas.com/kuku_array/index.html" class="external-link">
+            九九アレイ図メーカー
+          </a>
+          <a href="https://jimitas.com/wari-hissan/index.html" class="external-link">
+            わり算の筆算
+          </a>
+          <a href="https://jimitas.com/round-off/index.html" class="external-link">
+            算数　がい数の練習
+          </a>
+          <a href="https://jimitas.com/fushidukuri/index.html" class="external-link">
+            ふしづくり（全学年）
+          </a>
+          <a href="https://jimitas.com/eawase/index.html" class="external-link">
+            絵合わせゲーム
+          </a>
+          <a href="https://jimitas.com/nandemo/index.html" class="external-link">
+            なんでもトランプ
+          </a>
+        </div>
+      </section>
+    </div>
+  </nav>
+
+  <!-- Menu Toggle Button -->
+  <button id="menubar_hdr" class="menu-toggle" aria-label="メニューを開く">
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+    <span class="hamburger-line"></span>
+  </button>
+
+  <!-- Top Return Button -->
+  <a href="#top" id="pagetop" class="page-top" aria-label="トップへ戻る">
+    <img src="images/logo.png" alt="トップへ戻る">
+  </a>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <small>Copyright© <a href="index.html">もっと学習コンテンツ</a> All Rights Reserved.</small>
+      <span class="footer-link">
+        <a href="https://jimitas.com/" target="_blank" rel="noopener">jimitas.com</a>
+      </span>
+    </div>
+  </footer>
+
+  <!-- Error Modal -->
+  <div id="error-modal" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">エラー</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+        </div>
+        <div class="modal-body" id="error-message">
+          <!-- Error message will be inserted here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+          <button type="button" class="btn btn-primary" onclick="location.reload()">再読み込み</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- External Libraries -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/protonet-jquery.inview/1.1.2/jquery.inview.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/13.1.25/Tone.js"></script>
+  <script src="howler.min.js"></script>
+
+  <!-- Legacy Scripts (for backward compatibility) -->
+  <script src="js/main.js"></script>
+  <script src="js/jquery.inview_set.js"></script>
+
+  <!-- Main Application -->
+  <script type="module" src="src/index.js"></script>
+</body>
+
+</html>

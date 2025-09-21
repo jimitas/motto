@@ -1,0 +1,249 @@
+# もっと学習コンテンツ - Motto Learning Content
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.0.2-purple.svg)](https://getbootstrap.com/)
+
+> 小学校児童向けの日本語教育Webアプリケーション - 算数、英語、音楽、地理、美術の29個の学習モジュール
+
+## 🌟 概要
+
+**もっと学習コンテンツ**は、小学校の児童向けに設計された包括的な学習プラットフォームです。jimitas.comによって開発され、算数、英語、音楽、地理、美術の分野で29個の interactive な学習モジュールを提供しています。
+
+### ✨ 主な特徴
+
+- 📚 **29個の学習モジュール** - 幅広い教科をカバー
+- 🎯 **インタラクティブ学習** - 音声、アニメーション、ゲーム要素
+- 📱 **レスポンシブデザイン** - PC、タブレット、スマートフォン対応
+- ♿ **アクセシビリティ対応** - スクリーンリーダー、キーボードナビゲーション
+- 🚀 **高性能** - モジュラーアーキテクチャと遅延読み込み
+- 🎨 **子ども向けUI** - 直感的で親しみやすいインターフェース
+
+## 📋 学習モジュール
+
+### 🔤 言語学習 (Language)
+- **Classroom English** - 教室で使う基本英語
+- **English words** - 基本英単語
+- **カタカナのれんしゅう** - カタカナ学習
+- **ローマ字のれんしゅう** - ローマ字変換練習
+
+### 🔢 数学 (Math)
+- **すうずぶろっく** - 数の概念理解
+- **かぞえぼう** - 数え方学習
+- **とけい** - 時計の読み方
+- **九九のれんしゅう** - 掛け算九九
+- **九九のひょう** - 九九表
+- **たし算のひっ算** - 足し算筆算
+- **ひき算のひっ算** - 引き算筆算
+- **かけ算の筆算１・２** - 掛け算筆算
+- **かけ算アレイ図** - 配列を使った掛け算理解
+- **おかね** - お金の計算
+
+### 🎵 音楽 (Music)
+- **けんばんハーモニカ** (かんたん・上級) - 鍵盤ハーモニカ演奏
+- **もっきん** - 木琴演奏
+- **てっきん** - 鉄琴演奏
+- **リコーダー１・２** - リコーダー演奏
+- **ふしづくり4年** - メロディ作成
+- **音楽記号を覚えよう** - 音楽記号学習
+- **音を出そう** - 基本的な音楽理論
+- **和音を出そう** - ハーモニー学習
+- **メトロノーム** - リズム練習
+
+### 🗺️ 地理 (Geography)
+- **京都市の１１区** - 京都市の行政区画
+- **都道府県をおぼえよう** - 日本の都道府県
+
+### 🎨 美術 (Art)
+- **せんやマスのいろぬり** - パターン塗り絵
+
+## 🚀 技術スタック
+
+### フロントエンド
+- **HTML5** - セマンティックマークアップ
+- **CSS3** - Bootstrap 5.0.2 + カスタムスタイル
+- **JavaScript ES6+** - モダンJavaScript、ES Modules
+- **Font Awesome** - アイコンライブラリ
+
+### ライブラリ・依存関係
+- **jQuery 3.6.0** - DOM操作
+- **Howler.js** - 高品質オーディオ再生
+- **Moveable** - ドラッグ&ドロップインタラクション
+- **html2canvas** - スクリーンショット機能
+
+### アーキテクチャ
+- **モジュラー設計** - 各学習モジュールは独立
+- **設定駆動** - 中央集権的な設定管理
+- **遅延読み込み** - パフォーマンス最適化
+- **エラーハンドリング** - 堅牢なエラー処理
+
+## 📁 プロジェクト構造
+
+```
+motto/
+├── src/                        # リファクタリング済みソースコード
+│   ├── config/
+│   │   └── modules.js         # モジュール設定
+│   ├── utils/
+│   │   ├── BaseModule.js      # 基底クラス
+│   │   ├── ModuleManager.js   # モジュール管理
+│   │   ├── SoundManager.js    # サウンド管理
+│   │   ├── ConfigValidator.js # 設定検証
+│   │   └── Logger.js          # ログ・エラー処理
+│   ├── styles/
+│   │   └── main.css          # 統合CSS
+│   └── index.js              # メインアプリケーション
+├── 01cren.js ~ 29kane.js      # 学習モジュール（29個）
+├── index.html                 # メインHTML（オリジナル）
+├── index-refactored.html      # リファクタリング版HTML
+├── style.css                  # メインスタイルシート
+├── se.js                      # サウンドエフェクト
+├── images/                    # 画像リソース
+├── Sounds/                    # 音声ファイル
+├── voice/                     # 音声ガイド
+└── README.md                  # このファイル
+```
+
+## 🛠️ セットアップ・使用方法
+
+### 1. リポジトリのクローン
+```bash
+git clone https://github.com/jimitas/motto.git
+cd motto
+```
+
+### 2. ローカルサーバーでの実行
+```bash
+# Python 3の場合
+python -m http.server 8000
+
+# Node.jsのlive-serverの場合
+npx live-server
+```
+
+### 3. ブラウザでアクセス
+```
+http://localhost:8000
+```
+
+## 🔧 開発・カスタマイズ
+
+### 新しいモジュールの追加
+
+1. **モジュールファイルの作成**
+```javascript
+// 30newmodule.js
+export function newmodule() {
+  // モジュールの実装
+}
+```
+
+2. **設定ファイルに追加**
+```javascript
+// src/config/modules.js
+newmodule: {
+  id: 'newmodule',
+  title: '新しいモジュール',
+  module: () => import('../../30newmodule.js'),
+  category: 'math'
+}
+```
+
+3. **HTMLメニューに追加**
+```html
+<li id="newmodule" role="button" tabindex="0"
+    aria-label="新しいモジュール - 数学学習モジュール">
+  新しいモジュール
+</li>
+```
+
+### デバッグ機能
+
+ブラウザのコンソールで以下のコマンドが使用可能：
+
+```javascript
+// アプリケーション統計
+mottoApp.getStats()
+
+// 詳細ヘルスレポート
+mottoApp.getHealthReport()
+
+// ログレベル設定
+logger.setLogLevel('debug')
+
+// 読み込み済みサウンド確認
+soundManager.getSoundIds()
+```
+
+## ♿ アクセシビリティ機能
+
+- **キーボードナビゲーション** - Tab、Enter、Spaceキー対応
+- **スクリーンリーダー対応** - ARIA属性、セマンティックHTML
+- **フォーカス管理** - 視覚的フォーカスインジケーター
+- **色覚多様性対応** - コントラスト比確保
+- **レスポンシブデザイン** - 様々なデバイスサイズに対応
+
+## 🌐 ブラウザ対応
+
+| ブラウザ | バージョン |
+|---------|-----------|
+| Chrome  | 85+       |
+| Firefox | 85+       |
+| Safari  | 14+       |
+| Edge    | 85+       |
+
+## 📊 パフォーマンス最適化
+
+- **遅延読み込み** - モジュールの動的インポート
+- **リソースキャッシュ** - 効率的なメモリ管理
+- **事前読み込み** - 重要モジュールの先読み
+- **エラー復旧** - 堅牢なエラーハンドリング
+
+## 🤝 貢献方法
+
+1. **フォーク** - リポジトリをフォーク
+2. **ブランチ作成** - 機能用ブランチを作成
+```bash
+git checkout -b feature/new-learning-module
+```
+3. **変更実装** - コードの追加・修正
+4. **テスト** - 動作確認
+5. **プルリクエスト** - 変更内容の説明と共に送信
+
+### 開発ガイドライン
+
+- **コードスタイル**: ES6+、JSDoc コメント
+- **アクセシビリティ**: WCAG 2.1 AA準拠
+- **パフォーマンス**: Core Web Vitals最適化
+- **テスト**: 手動テスト必須
+
+## 📝 ライセンス
+
+このプロジェクトは [MIT License](https://opensource.org/licenses/MIT) の下で公開されています。
+
+## 👏 クレジット
+
+- **開発**: [jimitas.com](https://jimitas.com/)
+- **UI/UX**: Bootstrap 5.0.2
+- **オーディオ**: Howler.js
+- **アイコン**: Font Awesome
+- **インタラクション**: Moveable
+
+## 🔗 関連リンク
+
+- **本家サイト**: [jimitas.com](https://jimitas.com/)
+- **リファクタリング詳細**: [REFACTOR_GUIDE.md](REFACTOR_GUIDE.md)
+- **問題報告**: [GitHub Issues](https://github.com/jimitas/motto/issues)
+
+## 📈 今後の予定
+
+- [ ] TypeScript移行
+- [ ] 自動テストスイート実装
+- [ ] PWA対応（オフライン機能）
+- [ ] 多言語対応（国際化）
+- [ ] 学習進捗トラッキング
+- [ ] 教師用ダッシュボード
+
+---
+
+**もっと学習コンテンツ** で、子どもたちの学びをもっと楽しく、もっと効果的に！ 🎓✨
