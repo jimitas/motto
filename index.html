@@ -36,6 +36,8 @@
   <link rel="stylesheet" href="//use.fontawesome.com/releases/v5.14.0/css/all.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
   <script type="module" src="index.js">
   </script>
 
@@ -60,6 +62,9 @@
     </div>
   </main>
 
+  <!-- Toast container for notifications -->
+  <div id="toast-container" class="position-fixed top-0 end-0 p-3" style="z-index: 11"></div>
+
   <!-- footer -->
   <footer style="display:flex;z-index: 1000;">
     <small>Copyright&copy; <a href="index.html">もっと学習コンテンツ</a> All Rights Reserved.</small>
@@ -71,31 +76,31 @@
   <nav id="menubar">
     <div>
       <div class="container d-flex justify-content-center px-5">
-        <ul class="px-2">
-          <li>　</li>
-          <li id="cren">Classroom English</li>
-          <li id="enwo">English words</li>
-          <li id="subl">すうずぶろっく</li>
-          <li id="kata">カタカナのれんしゅう</li>
-          <li id="kbou">かぞえぼう</li>
-          <li id="toke">とけい</li>
-          <li id="ham2">けんばんハーモニカ かんたん</li>
-          <li id="kenb">けんばんハーモニカ2</li>
-          <li id="mokn">もっきん</li>
-          <li id="tekn">てっきん</li>
+        <ul class="px-2" role="list">
+          <li aria-hidden="true">　</li>
+          <li id="cren" role="button" tabindex="0" aria-label="Classroom English - 英語学習モジュール">Classroom English</li>
+          <li id="enwo" role="button" tabindex="0" aria-label="English words - 英単語学習モジュール">English words</li>
+          <li id="subl" role="button" tabindex="0" aria-label="すうずぶろっく - 数学学習モジュール">すうずぶろっく</li>
+          <li id="kata" role="button" tabindex="0" aria-label="カタカナのれんしゅう - 言語学習モジュール">カタカナのれんしゅう</li>
+          <li id="kbou" role="button" tabindex="0" aria-label="かぞえぼう - 数学学習モジュール">かぞえぼう</li>
+          <li id="toke" role="button" tabindex="0" aria-label="とけい - 時計学習モジュール">とけい</li>
+          <li id="ham2" role="button" tabindex="0" aria-label="けんばんハーモニカ かんたん - 音楽学習モジュール">けんばんハーモニカ かんたん</li>
+          <li id="kenb" role="button" tabindex="0" aria-label="けんばんハーモニカ2 - 音楽学習モジュール">けんばんハーモニカ2</li>
+          <li id="mokn" role="button" tabindex="0" aria-label="もっきん - 音楽学習モジュール">もっきん</li>
+          <li id="tekn" role="button" tabindex="0" aria-label="てっきん - 音楽学習モジュール">てっきん</li>
         </ul>
-        <ul class="px-2">
-          <li>　</li>
-          <li id="tahi">たし算のひっ算</li>
-          <li id="hihi">ひき算のひっ算</li>
-          <li id="kuku">九九のれんしゅう</li>
-          <li id="masu">せんやマスのいろぬり</li>
-          <li id="hyou">九九のひょう</li>
-          <li id="reco">リコーダー</li>
-          <li id="rec2">リコーダー2</li>
-          <li id="kah1">かけ算の筆算１</li>
-          <li id="kah2">かけ算の筆算２</li>
-          <li id="roma">ローマ字のれんしゅう</li>
+        <ul class="px-2" role="list">
+          <li aria-hidden="true">　</li>
+          <li id="tahi" role="button" tabindex="0" aria-label="たし算のひっ算 - 数学学習モジュール">たし算のひっ算</li>
+          <li id="hihi" role="button" tabindex="0" aria-label="ひき算のひっ算 - 数学学習モジュール">ひき算のひっ算</li>
+          <li id="kuku" role="button" tabindex="0" aria-label="九九のれんしゅう - 数学学習モジュール">九九のれんしゅう</li>
+          <li id="masu" role="button" tabindex="0" aria-label="せんやマスのいろぬり - 美術学習モジュール">せんやマスのいろぬり</li>
+          <li id="hyou" role="button" tabindex="0" aria-label="九九のひょう - 数学学習モジュール">九九のひょう</li>
+          <li id="reco" role="button" tabindex="0" aria-label="リコーダー - 音楽学習モジュール">リコーダー</li>
+          <li id="rec2" role="button" tabindex="0" aria-label="リコーダー2 - 音楽学習モジュール">リコーダー2</li>
+          <li id="kah1" role="button" tabindex="0" aria-label="かけ算の筆算１ - 数学学習モジュール">かけ算の筆算１</li>
+          <li id="kah2" role="button" tabindex="0" aria-label="かけ算の筆算２ - 数学学習モジュール">かけ算の筆算２</li>
+          <li id="roma" role="button" tabindex="0" aria-label="ローマ字のれんしゅう - 言語学習モジュール">ローマ字のれんしゅう</li>
         </ul>
         <ul class="px-2" role="list">
           <li aria-hidden="true">　</li>
@@ -112,16 +117,6 @@
       </div>
 
       <h2>もっと がくしゅう コンテンツ　+α</h2>
-      <section class="seo-content" style="padding: 20px; margin: 20px 0; background-color: #f8f9fa;">
-        <h3>jimitas.com - 地味に助かる学習コンテンツについて</h3>
-        <p>jimitas.comは、小学校の児童向けに<strong>算数</strong>、<strong>リコーダー</strong>、<strong>鍵盤ハーモニカ</strong>、<strong>英語</strong>などの学習教材を無料で提供するサイトです。九九の練習、筆算、かけ算、音楽記号の学習など、小学校の授業で役立つ地味に助かるコンテンツを多数ご用意しています。</p>
-        <ul>
-          <li><strong>算数学習</strong>: 九九のれんしゅう、たし算・ひき算の筆算、かけ算の筆算、がい数の練習</li>
-          <li><strong>音楽学習</strong>: リコーダー演奏、鍵盤ハーモニカ練習、音楽記号の学習、メトロノーム</li>
-          <li><strong>英語学習</strong>: Classroom English、English words、ローマ字練習</li>
-          <li><strong>その他</strong>: 都道府県学習、京都市の区、カタカナ練習</li>
-        </ul>
-      </section>
       <div class="container m-1 d-flex justify-content-center">
         <div  class="d-flex justify-content-start flex-wrap px-5 py-2">
         

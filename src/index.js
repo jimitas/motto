@@ -9,6 +9,7 @@
 import { ModuleManager } from './utils/ModuleManager.js';
 import { getModuleIds, moduleConfig } from './config/modules.js';
 import { ConfigValidator } from './utils/ConfigValidator.js';
+import { ToastManager } from './utils/ToastManager.js';
 import * as se from '../se.js';
 
 /**
@@ -23,6 +24,9 @@ class Application {
   constructor() {
     /** @type {ModuleManager} Module manager instance */
     this.moduleManager = new ModuleManager();
+
+    /** @type {ToastManager} Toast notification manager */
+    this.toastManager = new ToastManager();
 
     /** @type {string[]} Array of available module IDs */
     this.moduleIds = getModuleIds();
@@ -56,6 +60,9 @@ class Application {
 
       this.initialized = true;
       console.log('Application initialized successfully');
+
+      // Show welcome toast for first-time visitors
+      this.toastManager.showWelcomeToast();
 
     } catch (error) {
       console.error('Failed to initialize application:', error);
@@ -142,6 +149,13 @@ class Application {
     } catch (error) {
       console.error(`Failed to load module ${moduleId}:`, error);
       this.showModuleLoadError(moduleId, error);
+
+      // Show error toast
+      this.toastManager.error(
+        'モジュール読み込みエラー',
+        `「${moduleId}」の読み込みに失敗しました。もう一度お試しください。`,
+        { timeout: 5000, persistent: false }
+      );
     }
   }
 
@@ -334,7 +348,8 @@ window.onload = async function() {
   app.setupHistoryNavigation();
 };
 
-// Make app available globally for debugging
+// Make app and toast manager available globally for debugging
 window.mottoApp = app;
+window.toastManager = app.toastManager;
 
 export default app;
