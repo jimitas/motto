@@ -121,7 +121,7 @@ export function kenb() {
     `#ﾄﾞ/♭ﾚ<br>(-)`,
     `ﾚ<br>([)`,
   ];
-  const sizePerNote = (totalWidth / allNotes.length) * 1.5;
+  const sizePerNote = Math.min((totalWidth / allNotes.length) * 0.9, 50);
   for (let i = 0; i < allNotes.length; i++) {
     var currentNote = allNotes[i];
     var node = document.createElement("li");
