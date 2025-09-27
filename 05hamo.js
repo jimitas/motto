@@ -1,7 +1,36 @@
 import { soun } from "./sound.js";
-export function hamo() {
-  soun(0);
-  //データの読み込み
+
+function createHamonikaAudioSources() {
+  const No = [2, 4, 6, 0, 9, 11, 0, 14, 16, 18, 0, 21, 23, 0, 26, 1, 3, 5, 7, 8, 10, 12, 13, 15, 17, 19, 20, 22, 24, 25, 27];
+  const se = {};
+  const promises = [];
+
+  for (let i = 0; i < No.length; i++) {
+    if (No[i] !== 0) {
+      promises.push(new Promise((resolve) => {
+        se[No[i]] = new Howl({
+          src: ["Sounds/ke-" + No[i] + ".mp3"],
+          preload: true,
+          volume: 1.0,
+          loop: false,
+          autoplay: false,
+          onload: () => {
+            console.log(`ハーモニカ音源 ${No[i]} 読み込み完了`);
+            resolve();
+          },
+          onloaderror: (id, error) => {
+            console.warn(`ハーモニカ音源 ${No[i]} 読み込みエラー:`, error);
+            resolve();
+          }
+        });
+      }));
+    }
+  }
+
+  return { se, loadPromise: Promise.all(promises) };
+}
+
+function createHamonikaKeyboard(audioSources) {
   const No = [2, 4, 6, 0, 9, 11, 0, 14, 16, 18, 0, 21, 23, 0, 26, 1, 3, 5, 7, 8, 10, 12, 13, 15, 17, 19, 20, 22, 24, 25, 27];
   const sound_data = [
     `#ﾌｧ/♭ｿ<br>(A)`,
@@ -19,9 +48,6 @@ export function hamo() {
     `#ﾚ/♭ﾐ<br>(6)`,
     ``,
     `#ﾌｧ/♭ｿ<br>(8)`,
-    // `#ｿ/♭ﾗ<br>(9)`,
-    // `#ﾗ/♭ｼ<br>(0)`,
-    // `#ﾄﾞ/♭ﾚ<br>(-)`,
     `ﾌｧ<br>(左shift)`,
     `ｿ<br>(Z)`,
     `ﾗ<br>(X)`,
@@ -46,7 +72,7 @@ export function hamo() {
 
   var Key_flag = [];
   const len = [0, 15, 31];
-  //それぞれのキーにイベントを割り当てる。
+
   const Kenhamo = document.createElement("div");
   Kenhamo.classList.add("Kenhamo");
   const Black = document.createElement("div");
@@ -63,33 +89,25 @@ export function hamo() {
       } else {
         Key.innerHTML = sound_data[i];
 
-        const se = new Howl({
-          //読み込む音声ファイル
-          src: ["Sounds/ke-" + No[i] + ".mp3"],
-
-          // 設定 (以下はデフォルト値です)
-          preload: true, // 事前ロード
-          volume: 1.0, // 音量(0.0〜1.0の範囲で指定)
-          loop: false, // ループ再生するか
-          autoplay: false, // 自動再生するか
-
-          // 読み込み完了時に実行する処理
-          onload: () => {
-            Key.removeAttribute("disabled"); // ボタンを使用可能にする
-          },
-        });
-
         Key.addEventListener("mousedown", () => {
-          se.play();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].play();
+          }
         });
         Key.addEventListener("mouseup", () => {
-          se.stop();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].stop();
+          }
         });
         Key.addEventListener("touchstart", () => {
-          se.play();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].play();
+          }
         });
         Key.addEventListener("touchend", () => {
-          se.stop();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].stop();
+          }
         });
         if (j == 0) {
           Key.classList.add("black");
@@ -103,6 +121,59 @@ export function hamo() {
     Kenhamo.appendChild(Black);
     Kenhamo.appendChild(White);
   }
+  return Kenhamo;
+}
 
-  content.appendChild(Kenhamo);
+export function hamo() {
+  soun(0);
+
+  // 読み込み状態表示
+  document.getElementById("content").innerHTML = `
+    <div id="loading-status" style="position: fixed; top: 20px; right: 20px; padding: 8px 16px; background-color: #e3f2fd; border-radius: 4px; font-size: 12px; color: #1976d2; z-index: 1000;">
+      ハーモニカ音源読み込み中...
+    </div>
+  `;
+
+  // 音声を並列で読み込み
+  const audioData = createHamonikaAudioSources();
+
+  // 読み込み完了後にキーボードを設定
+  audioData.loadPromise.then(() => {
+    const keyboard = createHamonikaKeyboard(audioData.se);
+
+    const content = document.getElementById("content");
+    content.innerHTML = "";
+    content.appendChild(keyboard);
+
+    // 読み込み状態を更新
+    const loadingStatus = document.getElementById("loading-status");
+    if (loadingStatus) {
+      loadingStatus.style.backgroundColor = "#e8f5e8";
+      loadingStatus.style.color = "#2e7d32";
+      loadingStatus.innerHTML = "ハーモニカ音源読み込み完了! クリックで演奏できます。";
+
+      setTimeout(() => {
+        if (loadingStatus) {
+          loadingStatus.style.transition = "opacity 0.5s";
+          loadingStatus.style.opacity = "0";
+          setTimeout(() => {
+            if (loadingStatus && loadingStatus.parentNode) {
+              loadingStatus.parentNode.removeChild(loadingStatus);
+            }
+          }, 500);
+        }
+      }, 3000);
+    }
+
+    console.log("全ハーモニカ音源読み込み完了 - ハーモニカ準備完了!");
+  }).catch((error) => {
+    console.error("ハーモニカ音源読み込みエラー:", error);
+
+    const loadingStatus = document.getElementById("loading-status");
+    if (loadingStatus) {
+      loadingStatus.style.backgroundColor = "#ffebee";
+      loadingStatus.style.color = "#c62828";
+      loadingStatus.innerHTML = "ハーモニカ音源読み込みエラーが発生しました。";
+    }
+  });
 }
