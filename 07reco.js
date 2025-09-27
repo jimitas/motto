@@ -228,7 +228,12 @@ export function reco() {
   const recorderData = createRecorderTable();
   const keyboard = createKeyboard(recorderData.holes, fingerSystem);
 
-  keyboard.appendChild(recorderData.table);
-  content.appendChild(keyboard);
-  keyboard.style.display = "flex";
+  // field要素を作成してリコーダーと鍵盤を横並びに配置
+  const field = document.createElement("div");
+  field.classList.add("field");
+  field.style.display = "flex";
+
+  field.appendChild(recorderData.table);
+  field.appendChild(keyboard);
+  content.appendChild(field);
 }
