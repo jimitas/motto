@@ -111,7 +111,37 @@ function setupFingerSystem() {
   return { Finger, unshi };
 }
 
-function createKeyboard(holes, fingerSystem) {
+function createAudioSources() {
+  const No = [9, 11, 0, 14, 16, 18, 0, 21, 23, 0, 26, 28, 30, 0, 33, 8, 10, 12, 13, 15, 17, 19, 20, 22, 24, 25, 27, 29, 31, 32, 34];
+  const se = {};
+  const promises = [];
+
+  for (let i = 0; i < No.length; i++) {
+    if (No[i] !== 0) {
+      promises.push(new Promise((resolve) => {
+        se[No[i]] = new Howl({
+          src: ["Sounds/re_" + No[i] + ".mp3"],
+          preload: true,
+          volume: 1.0,
+          loop: false,
+          autoplay: false,
+          onload: () => {
+            console.log(`音源 ${No[i]} 読み込み完了`);
+            resolve();
+          },
+          onloaderror: (id, error) => {
+            console.warn(`音源 ${No[i]} 読み込みエラー:`, error);
+            resolve();
+          }
+        });
+      }));
+    }
+  }
+
+  return { se, loadPromise: Promise.all(promises) };
+}
+
+function createKeyboard(holes, fingerSystem, audioSources) {
   // 確実な定数
   const KEYBOARD_TYPES = 2;     // 鍵盤の種類数（黒鍵・白鍵）
 
@@ -172,39 +202,31 @@ function createKeyboard(holes, fingerSystem) {
       } else {
         Key.innerHTML = sound_data[i];
 
-        const se = new Howl({
-          //読み込む音声ファイル
-          src: ["Sounds/re_" + No[i] + ".mp3"],
-
-          // 設定 (以下はデフォルト値です)
-          preload: true, // 事前ロード
-          volume: 1.0, // 音量(0.0〜1.0の範囲で指定)
-          loop: false, // ループ再生するか
-          autoplay: false, // 自動再生するか
-
-          // 読み込み完了時に実行する処理
-          onload: () => {
-            Key.removeAttribute("disabled"); // ボタンを使用可能にする
-          },
-        });
-
         Key.addEventListener("mousedown", () => {
           // TODO: なぜ7を引く？（おそらくアルトリコーダーの音程オフセット）
           fingerSystem.Finger(No[i] - 7);
           fingerSystem.unshi(holes);
-          se.play();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].play();
+          }
         });
         Key.addEventListener("mouseup", () => {
-          se.stop();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].stop();
+          }
         });
         Key.addEventListener("touchstart", () => {
           // TODO: なぜ7を引く？（おそらくアルトリコーダーの音程オフセット）
           fingerSystem.Finger(No[i] - 7);
           fingerSystem.unshi(holes);
-          se.play();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].play();
+          }
         });
         Key.addEventListener("touchend", () => {
-          se.stop();
+          if (audioSources[No[i]]) {
+            audioSources[No[i]].stop();
+          }
         });
         if (j == 0) {
           Key.classList.add("black", "reco_black");
@@ -223,17 +245,70 @@ function createKeyboard(holes, fingerSystem) {
 }
 
 export function reco() {
+  // DOMを即座に構築
+  document.getElementById("content").innerHTML = `
+<div style="display: flex; gap: 20px; align-items: flex-start;">
+  <!-- 読み込み状態表示 -->
+  <div id="loading-status" style="position: fixed; top: 20px; right: 20px; padding: 8px 16px; background-color: #e3f2fd; border-radius: 4px; font-size: 12px; color: #1976d2; z-index: 1000;">
+    音源読み込み中...
+  </div>
+</div>
+`;
+
   const fingerSystem = setupFingerSystem();
-
   const recorderData = createRecorderTable();
-  const keyboard = createKeyboard(recorderData.holes, fingerSystem);
 
-  // field要素を作成してリコーダーと鍵盤を横並びに配置
-  const field = document.createElement("div");
-  field.classList.add("field");
-  field.style.display = "flex";
+  // 音声を並列で読み込み
+  const audioData = createAudioSources();
 
-  field.appendChild(recorderData.table);
-  field.appendChild(keyboard);
-  content.appendChild(field);
+  // 読み込み完了後にキーボードを設定
+  audioData.loadPromise.then(() => {
+    const keyboard = createKeyboard(recorderData.holes, fingerSystem, audioData.se);
+
+    // field要素を作成してリコーダーと鍵盤を横並びに配置
+    const field = document.createElement("div");
+    field.classList.add("field");
+    field.style.display = "flex";
+
+    field.appendChild(recorderData.table);
+    field.appendChild(keyboard);
+
+    // 既存のコンテンツをクリアして新しいコンテンツを追加
+    const content = document.getElementById("content");
+    content.innerHTML = "";
+    content.appendChild(field);
+
+    // 読み込み状態を更新
+    const loadingStatus = document.getElementById("loading-status");
+    if (loadingStatus) {
+      loadingStatus.style.backgroundColor = "#e8f5e8";
+      loadingStatus.style.color = "#2e7d32";
+      loadingStatus.innerHTML = "音源読み込み完了! クリックで演奏できます。";
+
+      // 3秒後に状態表示をフェードアウト
+      setTimeout(() => {
+        if (loadingStatus) {
+          loadingStatus.style.transition = "opacity 0.5s";
+          loadingStatus.style.opacity = "0";
+          setTimeout(() => {
+            if (loadingStatus && loadingStatus.parentNode) {
+              loadingStatus.parentNode.removeChild(loadingStatus);
+            }
+          }, 500);
+        }
+      }, 3000);
+    }
+
+    console.log("全音源読み込み完了 - 鍵盤リコーダー準備完了!");
+  }).catch((error) => {
+    console.error("音源読み込みエラー:", error);
+
+    // エラー状態を表示
+    const loadingStatus = document.getElementById("loading-status");
+    if (loadingStatus) {
+      loadingStatus.style.backgroundColor = "#ffebee";
+      loadingStatus.style.color = "#c62828";
+      loadingStatus.innerHTML = "音源読み込みエラーが発生しました。";
+    }
+  });
 }

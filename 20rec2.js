@@ -144,21 +144,33 @@ function setupTouchPrevention() {
 }
 
 function createAudioSources() {
-  //音源の登録
-  var se = [];
+  //音源の並列読み込み
+  const se = [];
+  const promises = [];
+
   for (let i = 1; i < 35; i++) {
-    //各音の登録
-    se[i] = new Howl({
-      //読み込む音声ファイル
-      src: "./Sounds/re_" + i + ".mp3",
-      // 設定 (以下はデフォルト値です)
-      preload: true, // 事前ロード
-      volume: 1.0, // 音量(0.0〜1.0の範囲で指定)
-      loop: false, // ループ再生するか
-      autoplay: false, // 自動再生するか
-    });
+    promises.push(new Promise((resolve) => {
+      se[i] = new Howl({
+        //読み込む音声ファイル
+        src: "./Sounds/re_" + i + ".mp3",
+        // 設定 (以下はデフォルト値です)
+        preload: true, // 事前ロード
+        volume: 1.0, // 音量(0.0〜1.0の範囲で指定)
+        loop: false, // ループ再生するか
+        autoplay: false, // 自動再生するか
+        onload: () => {
+          console.log(`音源 ${i} 読み込み完了`);
+          resolve();
+        },
+        onloaderror: (id, error) => {
+          console.warn(`音源 ${i} 読み込みエラー:`, error);
+          resolve(); // エラーでも続行
+        }
+      });
+    }));
   }
-  return se;
+
+  return { se, loadPromise: Promise.all(promises) };
 }
 
 export function rec2() {
@@ -167,6 +179,7 @@ export function rec2() {
   const AUDIO_COUNT = 35;       // 音源数
   const ALTO_OFFSET = 7;        // アルトリコーダーオフセット
 
+  // DOMは即座に構築
   document.getElementById("content").innerHTML = `
 <div style="display: flex; gap: 20px; align-items: flex-start;">
   <!-- リコーダー部分 -->
@@ -204,16 +217,59 @@ export function rec2() {
         単に移調したもので、運指が一致していない箇所があります。<br>
         おまけ程度にお考えください。タッチのみ対応です。
       </div>
+
+      <!-- 読み込み状態表示 -->
+      <div id="loading-status" style="margin-top: 15px; padding: 8px; background-color: #e3f2fd; border-radius: 4px; font-size: 11px; color: #1976d2;">
+        音源読み込み中...
+      </div>
     </div>
   </div>
 </div>
 `;
 
+  // リコーダーシステムを先に初期化
   const recorderSystem = setupRecorderSystem();
-  const se = createAudioSources();
 
-  // 音源をrecorderSystemに設定
-  recorderSystem.setSoundEngine(se);
+  // 音声を並列で読み込み
+  const audioData = createAudioSources();
+
+  // 読み込み完了後に音源を設定
+  audioData.loadPromise.then(() => {
+    recorderSystem.setSoundEngine(audioData.se);
+
+    // 読み込み状態を更新
+    const loadingStatus = document.getElementById("loading-status");
+    if (loadingStatus) {
+      loadingStatus.style.backgroundColor = "#e8f5e8";
+      loadingStatus.style.color = "#2e7d32";
+      loadingStatus.innerHTML = "音源読み込み完了! タッチで演奏できます。";
+
+      // 3秒後に状態表示をフェードアウト
+      setTimeout(() => {
+        if (loadingStatus) {
+          loadingStatus.style.transition = "opacity 0.5s";
+          loadingStatus.style.opacity = "0";
+          setTimeout(() => {
+            if (loadingStatus && loadingStatus.parentNode) {
+              loadingStatus.parentNode.removeChild(loadingStatus);
+            }
+          }, 500);
+        }
+      }, 3000);
+    }
+
+    console.log("全音源読み込み完了 - リコーダー準備完了!");
+  }).catch((error) => {
+    console.error("音源読み込みエラー:", error);
+
+    // エラー状態を表示
+    const loadingStatus = document.getElementById("loading-status");
+    if (loadingStatus) {
+      loadingStatus.style.backgroundColor = "#ffebee";
+      loadingStatus.style.color = "#c62828";
+      loadingStatus.innerHTML = "音源読み込みエラーが発生しました。";
+    }
+  });
 
   setupTouchPrevention();
 }
