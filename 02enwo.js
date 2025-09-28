@@ -27,30 +27,7 @@ function createAudioSources(Data) {
   return { audioSources, loadPromise: Promise.all(promises) };
 }
 
-function createImageSources(Data, startIndex) {
-  const promises = [];
-  const imageSources = {};
-
-  // 画像が必要なカテゴリ（i > 3）の要素のみ並列で読み込み
-  for (let i = startIndex; i < Data.length; i++) {
-    const filename = String(Data[i]).toLowerCase();
-    promises.push(new Promise((resolve) => {
-      const img = new Image();
-      imageSources[i] = img;
-      img.onload = () => {
-        console.log(`画像ファイル ${filename}.png 読み込み完了`);
-        resolve();
-      };
-      img.onerror = () => {
-        console.warn(`画像ファイル ${filename}.png 読み込みエラー`);
-        resolve(); // エラーでも続行
-      };
-      img.src = "image/" + filename + ".png";
-    }));
-  }
-
-  return { imageSources, imageLoadPromise: Promise.all(promises) };
-}
+// 画像は必要な時に読み込む（元の方式）
 
 export async function enwo() {
   //データの登録
@@ -130,9 +107,15 @@ export async function enwo() {
   // 音声ファイルを並列で読み込み開始
   const { audioSources, loadPromise } = createAudioSources(Data);
 
-  // 画像が必要な要素の開始インデックスを計算（i > 3のカテゴリから）
-  const imageStartIndex = Data_len[0] + Data_len[1] + Data_len[2] + Data_len[3]; // Numbers + Upper + Lower + Colors
-  const { imageSources, imageLoadPromise } = createImageSources(Data, imageStartIndex);
+  // 読み込み中表示の作成
+  const loadingDiv = document.createElement("div");
+  loadingDiv.classList.add("loading-display");
+  loadingDiv.style.textAlign = "center";
+  loadingDiv.style.padding = "20px";
+  loadingDiv.style.fontSize = "16px";
+  loadingDiv.style.color = "#666";
+  loadingDiv.innerHTML = "音声ファイルを読み込み中です...<br><small>しばらくお待ちください</small>";
+  content.appendChild(loadingDiv);
 
   //15つのパートのインデックス
   var index = 0;
@@ -173,16 +156,10 @@ export async function enwo() {
         button.style.backgroundColor = Data[j];
         if (j == index + 2 || j == index + 6 || j == index + 9) button.style.color = "black";
       }
-      //条件によって画像の作成・関連づけ
+      //条件によって画像の作成・関連づけ（元の方式：必要な時に読み込み）
       if (i > 3) {
         const img = document.createElement("img");
-        // 事前読み込みした画像を使用
-        if (imageSources[j]) {
-          img.src = imageSources[j].src;
-        } else {
-          // フォールバック：事前読み込みに失敗した場合の処理
-          img.setAttribute("src", "image/" + data.toLowerCase() + ".png");
-        }
+        img.setAttribute("src", "image/" + data.toLowerCase() + ".png");
         button.appendChild(img);
         if (i == 14) {
           img.style.height = "40px";
@@ -197,15 +174,27 @@ export async function enwo() {
     content.appendChild(hr);
   }
 
-  // 全音声・画像読み込み完了後にボタンを有効化
+  // 音声読み込み完了後にボタンを有効化（画像は個別読み込み）
   try {
-    await Promise.all([loadPromise, imageLoadPromise]);
-    console.log("全音声・画像ファイルの読み込み完了");
+    await loadPromise;
+    console.log("全音声ファイルの読み込み完了");
+
+    // 読み込み中表示を削除
+    if (loadingDiv && loadingDiv.parentNode) {
+      loadingDiv.parentNode.removeChild(loadingDiv);
+    }
+
     allButtons.forEach(button => {
       button.disabled = false;
     });
   } catch (error) {
-    console.error("音声・画像読み込みエラー:", error);
+    console.error("音声読み込みエラー:", error);
+
+    // 読み込み中表示を削除
+    if (loadingDiv && loadingDiv.parentNode) {
+      loadingDiv.parentNode.removeChild(loadingDiv);
+    }
+
     // エラーが発生してもボタンは有効化
     allButtons.forEach(button => {
       button.disabled = false;

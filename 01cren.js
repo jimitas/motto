@@ -76,6 +76,16 @@ export async function cren() {
   // 音声ファイルを並列で読み込み開始
   const { audioSources, loadPromise } = createAudioSources();
 
+  // 読み込み中表示の作成
+  const loadingDiv = document.createElement("div");
+  loadingDiv.classList.add("loading-display");
+  loadingDiv.style.textAlign = "center";
+  loadingDiv.style.padding = "20px";
+  loadingDiv.style.fontSize = "16px";
+  loadingDiv.style.color = "#666";
+  loadingDiv.innerHTML = "音声ファイルを読み込み中です...<br><small>しばらくお待ちください</small>";
+  content.appendChild(loadingDiv);
+
   //４つのパートのインデックス
   var index = 0;
 
@@ -118,11 +128,23 @@ export async function cren() {
   try {
     await loadPromise;
     console.log("全音声ファイルの読み込み完了");
+
+    // 読み込み中表示を削除
+    if (loadingDiv && loadingDiv.parentNode) {
+      loadingDiv.parentNode.removeChild(loadingDiv);
+    }
+
     allButtons.forEach(button => {
       button.disabled = false;
     });
   } catch (error) {
     console.error("音声読み込みエラー:", error);
+
+    // 読み込み中表示を削除
+    if (loadingDiv && loadingDiv.parentNode) {
+      loadingDiv.parentNode.removeChild(loadingDiv);
+    }
+
     // エラーが発生してもボタンは有効化
     allButtons.forEach(button => {
       button.disabled = false;
