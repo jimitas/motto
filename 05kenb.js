@@ -320,16 +320,35 @@ export function kenb() {
     document.removeEventListener("keyup", key_up, false);
   }
 
+  // Escape/Backspaceハンドラーを変数に保存（後でクリーンアップできるように）
+  const escapeBackspaceHandler = (e) => {
+    if (e.code === "Escape") {
+      keyboardRemoveEvent();
+    } else if (e.code === "Backspace") {
+      keyboardAddEvent();
+    }
+  };
+
+  // クリーンアップ関数をエクスポート
+  function cleanupKenb() {
+    // キーボードイベントを削除
+    keyboardRemoveEvent();
+
+    // Escape/Backspaceイベントを削除
+    document.removeEventListener("keydown", escapeBackspaceHandler, false);
+
+    // グローバル参照をクリア
+    if (window.currentPageCleanup === cleanupKenb) {
+      delete window.currentPageCleanup;
+    }
+
+    console.log("05kenb.js のキーボードイベントをクリーンアップしました");
+  }
+
+  // イベントリスナーを設定
   keyboardAddEvent();
-  document.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.code === "Escape") {
-        keyboardRemoveEvent();
-      } else if (e.code === "Backspace") {
-        keyboardAddEvent();
-      }
-    },
-    false
-  );
+  document.addEventListener("keydown", escapeBackspaceHandler, false);
+
+  // クリーンアップ関数をグローバルに登録
+  window.currentPageCleanup = cleanupKenb;
 }

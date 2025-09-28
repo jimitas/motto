@@ -1,4 +1,58 @@
-export function enwo() {
+function createAudioSources(Data) {
+  const promises = [];
+  const audioSources = {};
+
+  // 全音声ファイルを並列で読み込み
+  for (let i = 0; i < Data.length; i++) {
+    const filename = String(Data[i]).toLowerCase();
+    promises.push(new Promise((resolve) => {
+      audioSources[i] = new Howl({
+        src: ["voice/" + filename + ".mp3"],
+        preload: true,
+        volume: 1.0,
+        loop: false,
+        autoplay: false,
+        onload: () => {
+          console.log(`音声ファイル ${filename} 読み込み完了`);
+          resolve();
+        },
+        onloaderror: (id, error) => {
+          console.warn(`音声ファイル ${filename} 読み込みエラー:`, error);
+          resolve(); // エラーでも続行
+        }
+      });
+    }));
+  }
+
+  return { audioSources, loadPromise: Promise.all(promises) };
+}
+
+function createImageSources(Data, startIndex) {
+  const promises = [];
+  const imageSources = {};
+
+  // 画像が必要なカテゴリ（i > 3）の要素のみ並列で読み込み
+  for (let i = startIndex; i < Data.length; i++) {
+    const filename = String(Data[i]).toLowerCase();
+    promises.push(new Promise((resolve) => {
+      const img = new Image();
+      imageSources[i] = img;
+      img.onload = () => {
+        console.log(`画像ファイル ${filename}.png 読み込み完了`);
+        resolve();
+      };
+      img.onerror = () => {
+        console.warn(`画像ファイル ${filename}.png 読み込みエラー`);
+        resolve(); // エラーでも続行
+      };
+      img.src = "image/" + filename + ".png";
+    }));
+  }
+
+  return { imageSources, imageLoadPromise: Promise.all(promises) };
+}
+
+export async function enwo() {
   //データの登録
   const Data_title = ["Numbers", "Upper", "Lower", "Colors", "Condition", "Body", "Janken", "Animals", "Furuts", "Vegetables", "Things", "Sports", "Foods", "Weeks", "Month"];
   const Numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
@@ -73,8 +127,18 @@ export function enwo() {
   const Data_len = [31, 26, 26, 10, 6, 8, 3, 23, 10, 10, 26, 7, 15, 7, 12];
   //データの読み込み　ここまで
 
+  // 音声ファイルを並列で読み込み開始
+  const { audioSources, loadPromise } = createAudioSources(Data);
+
+  // 画像が必要な要素の開始インデックスを計算（i > 3のカテゴリから）
+  const imageStartIndex = Data_len[0] + Data_len[1] + Data_len[2] + Data_len[3]; // Numbers + Upper + Lower + Colors
+  const { imageSources, imageLoadPromise } = createImageSources(Data, imageStartIndex);
+
   //15つのパートのインデックス
   var index = 0;
+
+  // 全てのボタンを無効化状態で作成
+  const allButtons = [];
 
   //15つのパートに分けて表示
   for (let i = 0; i < 15; i++) {
@@ -90,25 +154,16 @@ export function enwo() {
       //ボタンの作成
       const button = document.createElement("button");
       button.classList.add("btn", "btn-words", "btn-primary");
-      //ボイスの登録
-      const se = new Howl({
-        //読み込む音声ファイル
-        src: ["voice/" + data.toLowerCase() + ".mp3"],
-        // 設定 (以下はデフォルト値です)
-        preload: true, // 事前ロード
-        volume: 1.0, // 音量(0.0〜1.0の範囲で指定)
-        loop: false, // ループ再生するか
-        autoplay: false, // 自動再生するか
-        // 読み込み完了時に実行する処理
-        onload: () => {
-          button.removeAttribute("disabled"); // ボタンを使用可能にする
-        },
-      });
-      //ボタンへのボイスの登録
+      button.disabled = true; // 音声読み込み完了まで無効化
+
+      //ボタンへのボイスの登録 - 並列読み込みした音声を使用
       button.addEventListener("click", () => {
-        se.seek(0);
-        se.play();
+        if (audioSources[j]) {
+          audioSources[j].seek(0);
+          audioSources[j].play();
+        }
       });
+
       //名称をつけるdivの作成とボタンへの関連づけ
       const div = document.createElement("div");
       div.innerHTML = Data[j];
@@ -121,17 +176,39 @@ export function enwo() {
       //条件によって画像の作成・関連づけ
       if (i > 3) {
         const img = document.createElement("img");
-        img.setAttribute("src", "image/" + data.toLowerCase() + ".png");
+        // 事前読み込みした画像を使用
+        if (imageSources[j]) {
+          img.src = imageSources[j].src;
+        } else {
+          // フォールバック：事前読み込みに失敗した場合の処理
+          img.setAttribute("src", "image/" + data.toLowerCase() + ".png");
+        }
         button.appendChild(img);
         if (i == 14) {
           img.style.height = "40px";
         }
       }
       content.appendChild(button);
+      allButtons.push(button);
     }
     index = index + len;
     //水平線の挿入
     const hr = document.createElement("hr");
     content.appendChild(hr);
+  }
+
+  // 全音声・画像読み込み完了後にボタンを有効化
+  try {
+    await Promise.all([loadPromise, imageLoadPromise]);
+    console.log("全音声・画像ファイルの読み込み完了");
+    allButtons.forEach(button => {
+      button.disabled = false;
+    });
+  } catch (error) {
+    console.error("音声・画像読み込みエラー:", error);
+    // エラーが発生してもボタンは有効化
+    allButtons.forEach(button => {
+      button.disabled = false;
+    });
   }
 }

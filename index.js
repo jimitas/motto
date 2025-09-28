@@ -80,6 +80,17 @@ function menu() {
   for (let i = 0; i < title.length; i++) {
     const menu = document.getElementById(title[i]);
     menu.addEventListener("click", () => {
+      // 前のページのクリーンアップを実行
+      if (window.currentPageCleanup) {
+        try {
+          window.currentPageCleanup();
+          console.log("前のページのクリーンアップを実行しました");
+        } catch (error) {
+          console.warn("クリーンアップ中にエラーが発生しました:", error);
+        }
+        delete window.currentPageCleanup;
+      }
+
       //メイン内の画面をクリア
       se.pi.currentTime = 0;
       se.pi.play();
