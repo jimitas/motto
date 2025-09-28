@@ -1,6 +1,11 @@
-function createAudioSources() {
+function createAudioSources(progressCallback) {
   const promises = [];
   const audioSources = {};
+  const startTime = performance.now();
+  let loadedCount = 0;
+  const totalCount = 37;
+
+  console.log("01cren: 並列音声読み込み開始 - 37ファイル");
 
   // 全音声ファイルを並列で読み込み
   for (let i = 0; i < 37; i++) {
@@ -12,18 +17,32 @@ function createAudioSources() {
         loop: false,
         autoplay: false,
         onload: () => {
-          console.log(`音声ファイル ${i + 1} 読み込み完了`);
+          loadedCount++;
+          console.log(`音声ファイル ${i + 1} 読み込み完了 (${loadedCount}/${totalCount})`);
+          if (progressCallback) {
+            progressCallback(loadedCount, totalCount);
+          }
           resolve();
         },
         onloaderror: (id, error) => {
+          loadedCount++;
           console.warn(`音声ファイル ${i + 1} 読み込みエラー:`, error);
+          if (progressCallback) {
+            progressCallback(loadedCount, totalCount);
+          }
           resolve(); // エラーでも続行
         }
       });
     }));
   }
 
-  return { audioSources, loadPromise: Promise.all(promises) };
+  const allPromise = Promise.all(promises).then(() => {
+    const endTime = performance.now();
+    const loadTime = (endTime - startTime) / 1000;
+    console.log(`01cren: 並列読み込み完了 - ${loadTime.toFixed(2)}秒`);
+  });
+
+  return { audioSources, loadPromise: allPromise };
 }
 
 export async function cren() {
@@ -73,9 +92,6 @@ export async function cren() {
     ` "It's too difficult." むずかしいです。`,
   ];
 
-  // 音声ファイルを並列で読み込み開始
-  const { audioSources, loadPromise } = createAudioSources();
-
   // 読み込み中表示の作成
   const loadingDiv = document.createElement("div");
   loadingDiv.classList.add("loading-display");
@@ -83,8 +99,17 @@ export async function cren() {
   loadingDiv.style.padding = "20px";
   loadingDiv.style.fontSize = "16px";
   loadingDiv.style.color = "#666";
-  loadingDiv.innerHTML = "音声ファイルを読み込み中です...<br><small>しばらくお待ちください</small>";
+  loadingDiv.innerHTML = "音声ファイルを読み込み中です...<br><small>0/37ファイル</small>";
   content.appendChild(loadingDiv);
+
+  // 進捗更新関数
+  const updateProgress = (loaded, total) => {
+    const percentage = Math.round((loaded / total) * 100);
+    loadingDiv.innerHTML = `音声ファイルを読み込み中です...<br><small>${loaded}/${total}ファイル (${percentage}%)</small>`;
+  };
+
+  // 音声ファイルを並列で読み込み開始
+  const { audioSources, loadPromise } = createAudioSources(updateProgress);
 
   //４つのパートのインデックス
   var index = 0;

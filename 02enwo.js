@@ -1,6 +1,11 @@
-function createAudioSources(Data) {
+function createAudioSources(Data, progressCallback) {
   const promises = [];
   const audioSources = {};
+  const startTime = performance.now();
+  let loadedCount = 0;
+  const totalCount = Data.length;
+
+  console.log(`02enwo: 並列音声読み込み開始 - ${Data.length}ファイル`);
 
   // 全音声ファイルを並列で読み込み
   for (let i = 0; i < Data.length; i++) {
@@ -13,18 +18,32 @@ function createAudioSources(Data) {
         loop: false,
         autoplay: false,
         onload: () => {
-          console.log(`音声ファイル ${filename} 読み込み完了`);
+          loadedCount++;
+          console.log(`音声ファイル ${filename} 読み込み完了 (${loadedCount}/${totalCount})`);
+          if (progressCallback) {
+            progressCallback(loadedCount, totalCount);
+          }
           resolve();
         },
         onloaderror: (id, error) => {
+          loadedCount++;
           console.warn(`音声ファイル ${filename} 読み込みエラー:`, error);
+          if (progressCallback) {
+            progressCallback(loadedCount, totalCount);
+          }
           resolve(); // エラーでも続行
         }
       });
     }));
   }
 
-  return { audioSources, loadPromise: Promise.all(promises) };
+  const allPromise = Promise.all(promises).then(() => {
+    const endTime = performance.now();
+    const loadTime = (endTime - startTime) / 1000;
+    console.log(`02enwo: 並列読み込み完了 - ${loadTime.toFixed(2)}秒 (${Data.length}ファイル)`);
+  });
+
+  return { audioSources, loadPromise: allPromise };
 }
 
 // 画像は必要な時に読み込む（元の方式）
@@ -104,9 +123,6 @@ export async function enwo() {
   const Data_len = [31, 26, 26, 10, 6, 8, 3, 23, 10, 10, 26, 7, 15, 7, 12];
   //データの読み込み　ここまで
 
-  // 音声ファイルを並列で読み込み開始
-  const { audioSources, loadPromise } = createAudioSources(Data);
-
   // 読み込み中表示の作成
   const loadingDiv = document.createElement("div");
   loadingDiv.classList.add("loading-display");
@@ -114,8 +130,19 @@ export async function enwo() {
   loadingDiv.style.padding = "20px";
   loadingDiv.style.fontSize = "16px";
   loadingDiv.style.color = "#666";
-  loadingDiv.innerHTML = "音声ファイルを読み込み中です...<br><small>しばらくお待ちください</small>";
+  // 読み込みファイル数を表示
+  const totalFiles = Data.length;
+  loadingDiv.innerHTML = `音声ファイルを読み込み中です...<br><small>0/${totalFiles}ファイル</small>`;
   content.appendChild(loadingDiv);
+
+  // 進捗更新関数
+  const updateProgress = (loaded, total) => {
+    const percentage = Math.round((loaded / total) * 100);
+    loadingDiv.innerHTML = `音声ファイルを読み込み中です...<br><small>${loaded}/${total}ファイル (${percentage}%)</small>`;
+  };
+
+  // 音声ファイルを並列で読み込み開始
+  const { audioSources, loadPromise } = createAudioSources(Data, updateProgress);
 
   //15つのパートのインデックス
   var index = 0;
