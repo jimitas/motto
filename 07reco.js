@@ -245,70 +245,91 @@ function createKeyboard(holes, fingerSystem, audioSources) {
 }
 
 export function reco() {
-  // DOMを即座に構築
-  document.getElementById("content").innerHTML = `
-<div style="display: flex; gap: 20px; align-items: flex-start;">
-  <!-- 読み込み状態表示 -->
-  <div id="loading-status" style="position: fixed; top: 20px; right: 20px; padding: 8px 16px; background-color: #e3f2fd; border-radius: 4px; font-size: 12px; color: #1976d2; z-index: 1000;">
-    音源読み込み中...
-  </div>
-</div>
-`;
-
-  const fingerSystem = setupFingerSystem();
-  const recorderData = createRecorderTable();
-
-  // 音声を並列で読み込み
+  // 音声を並列で読み込み開始
   const audioData = createAudioSources();
 
-  // 読み込み完了後にキーボードを設定
+  // UIを即座に表示（音声読み込みと並行）
+  const fingerSystem = setupFingerSystem();
+  const recorderData = createRecorderTable();
+  const keyboard = createKeyboard(recorderData.holes, fingerSystem, audioData.se);
+
+  // field要素を作成してリコーダーと鍵盤を横並びに配置
+  const field = document.createElement("div");
+  field.classList.add("field");
+  field.style.display = "flex";
+
+  field.appendChild(recorderData.table);
+  field.appendChild(keyboard);
+
+  // コンテンツを即座に表示
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+  content.appendChild(field);
+
+  // 読み込み状態表示
+  const loadingStatus = document.createElement("div");
+  loadingStatus.id = "loading-status";
+  loadingStatus.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #1976d2;
+    z-index: 1000;
+  `;
+  loadingStatus.innerHTML = "音源読み込み中...";
+  document.body.appendChild(loadingStatus);
+
+  // すべての鍵盤を無効状態に設定
+  const allKeys = keyboard.querySelectorAll('.black, .white');
+  allKeys.forEach(key => {
+    key.style.opacity = '0.6';
+    key.style.pointerEvents = 'none';
+    key.style.cursor = 'not-allowed';
+  });
+
+  // 音声読み込み完了後に鍵盤を有効化
   audioData.loadPromise.then(() => {
-    const keyboard = createKeyboard(recorderData.holes, fingerSystem, audioData.se);
-
-    // field要素を作成してリコーダーと鍵盤を横並びに配置
-    const field = document.createElement("div");
-    field.classList.add("field");
-    field.style.display = "flex";
-
-    field.appendChild(recorderData.table);
-    field.appendChild(keyboard);
-
-    // 既存のコンテンツをクリアして新しいコンテンツを追加
-    const content = document.getElementById("content");
-    content.innerHTML = "";
-    content.appendChild(field);
+    // 鍵盤を有効化
+    allKeys.forEach(key => {
+      key.style.opacity = '1';
+      key.style.pointerEvents = 'auto';
+      key.style.cursor = 'pointer';
+    });
 
     // 読み込み状態を更新
-    const loadingStatus = document.getElementById("loading-status");
-    if (loadingStatus) {
-      loadingStatus.style.backgroundColor = "#e8f5e8";
-      loadingStatus.style.color = "#2e7d32";
-      loadingStatus.innerHTML = "音源読み込み完了! クリックで演奏できます。";
+    loadingStatus.style.backgroundColor = "#e8f5e8";
+    loadingStatus.style.color = "#2e7d32";
+    loadingStatus.innerHTML = "音源読み込み完了! クリックで演奏できます。";
 
-      // 3秒後に状態表示をフェードアウト
-      setTimeout(() => {
-        if (loadingStatus) {
-          loadingStatus.style.transition = "opacity 0.5s";
-          loadingStatus.style.opacity = "0";
-          setTimeout(() => {
-            if (loadingStatus && loadingStatus.parentNode) {
-              loadingStatus.parentNode.removeChild(loadingStatus);
-            }
-          }, 500);
-        }
-      }, 3000);
-    }
+    setTimeout(() => {
+      if (loadingStatus && loadingStatus.parentNode) {
+        loadingStatus.style.transition = "opacity 0.5s";
+        loadingStatus.style.opacity = "0";
+        setTimeout(() => {
+          if (loadingStatus.parentNode) {
+            loadingStatus.parentNode.removeChild(loadingStatus);
+          }
+        }, 500);
+      }
+    }, 3000);
 
     console.log("全音源読み込み完了 - 鍵盤リコーダー準備完了!");
   }).catch((error) => {
     console.error("音源読み込みエラー:", error);
 
-    // エラー状態を表示
-    const loadingStatus = document.getElementById("loading-status");
-    if (loadingStatus) {
-      loadingStatus.style.backgroundColor = "#ffebee";
-      loadingStatus.style.color = "#c62828";
-      loadingStatus.innerHTML = "音源読み込みエラーが発生しました。";
-    }
+    // エラー時も鍵盤は有効化（音は出ないが操作可能）
+    allKeys.forEach(key => {
+      key.style.opacity = '1';
+      key.style.pointerEvents = 'auto';
+      key.style.cursor = 'pointer';
+    });
+
+    loadingStatus.style.backgroundColor = "#ffebee";
+    loadingStatus.style.color = "#c62828";
+    loadingStatus.innerHTML = "音源読み込みエラーが発生しました。";
   });
 }

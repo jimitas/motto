@@ -117,53 +117,79 @@ function createMokkinKeyboard(audioSources) {
 }
 
 export function mokn() {
-  // 読み込み状態表示
-  document.getElementById("content").innerHTML = `
-    <div id="loading-status" style="position: fixed; top: 20px; right: 20px; padding: 8px 16px; background-color: #e3f2fd; border-radius: 4px; font-size: 12px; color: #1976d2; z-index: 1000;">
-      木琴音源読み込み中...
-    </div>
-  `;
-
-  // 音声を並列で読み込み
+  // 音声を並列で読み込み開始
   const audioData = createMokkinAudioSources();
 
-  // 読み込み完了後にキーボードを設定
-  audioData.loadPromise.then(() => {
-    const keyboard = createMokkinKeyboard(audioData.se);
+  // UIを即座に表示（音声読み込みと並行）
+  const keyboard = createMokkinKeyboard(audioData.se);
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+  content.appendChild(keyboard);
 
-    const content = document.getElementById("content");
-    content.innerHTML = "";
-    content.appendChild(keyboard);
+  // 読み込み状態表示
+  const loadingStatus = document.createElement("div");
+  loadingStatus.id = "loading-status";
+  loadingStatus.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    background-color: #e3f2fd;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #1976d2;
+    z-index: 1000;
+  `;
+  loadingStatus.innerHTML = "木琴音源読み込み中...";
+  document.body.appendChild(loadingStatus);
+
+  // すべての鍵盤を無効状態に設定
+  const allKeys = keyboard.querySelectorAll('.mokkin_black, .mokkin_white');
+  allKeys.forEach(key => {
+    key.style.opacity = '0.6';
+    key.style.pointerEvents = 'none';
+    key.style.cursor = 'not-allowed';
+  });
+
+  // 音声読み込み完了後に鍵盤を有効化
+  audioData.loadPromise.then(() => {
+    // 鍵盤を有効化
+    allKeys.forEach(key => {
+      key.style.opacity = '1';
+      key.style.pointerEvents = 'auto';
+      key.style.cursor = 'pointer';
+    });
 
     // 読み込み状態を更新
-    const loadingStatus = document.getElementById("loading-status");
-    if (loadingStatus) {
-      loadingStatus.style.backgroundColor = "#e8f5e8";
-      loadingStatus.style.color = "#2e7d32";
-      loadingStatus.innerHTML = "木琴音源読み込み完了! クリックで演奏できます。";
+    loadingStatus.style.backgroundColor = "#e8f5e8";
+    loadingStatus.style.color = "#2e7d32";
+    loadingStatus.innerHTML = "木琴音源読み込み完了! クリックで演奏できます。";
 
-      setTimeout(() => {
-        if (loadingStatus) {
-          loadingStatus.style.transition = "opacity 0.5s";
-          loadingStatus.style.opacity = "0";
-          setTimeout(() => {
-            if (loadingStatus && loadingStatus.parentNode) {
-              loadingStatus.parentNode.removeChild(loadingStatus);
-            }
-          }, 500);
-        }
-      }, 3000);
-    }
+    setTimeout(() => {
+      if (loadingStatus && loadingStatus.parentNode) {
+        loadingStatus.style.transition = "opacity 0.5s";
+        loadingStatus.style.opacity = "0";
+        setTimeout(() => {
+          if (loadingStatus.parentNode) {
+            loadingStatus.parentNode.removeChild(loadingStatus);
+          }
+        }, 500);
+      }
+    }, 3000);
 
     console.log("全木琴音源読み込み完了 - 木琴準備完了!");
   }).catch((error) => {
     console.error("木琴音源読み込みエラー:", error);
 
-    const loadingStatus = document.getElementById("loading-status");
-    if (loadingStatus) {
-      loadingStatus.style.backgroundColor = "#ffebee";
-      loadingStatus.style.color = "#c62828";
-      loadingStatus.innerHTML = "木琴音源読み込みエラーが発生しました。";
-    }
+    // エラー時も鍵盤は有効化（音は出ないが操作可能）
+    allKeys.forEach(key => {
+      key.style.opacity = '1';
+      key.style.pointerEvents = 'auto';
+      key.style.cursor = 'pointer';
+    });
+
+    loadingStatus.style.backgroundColor = "#ffebee";
+    loadingStatus.style.color = "#c62828";
+    loadingStatus.innerHTML = "木琴音源読み込みエラーが発生しました。";
   });
 }
